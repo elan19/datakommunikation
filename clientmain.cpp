@@ -85,7 +85,6 @@ int main(int argc, char *argv[]){
 
   freeaddrinfo(si);
 
-  printf("hejsanhoppsan\n");
   char buf[128];
   int bytes;
 
@@ -96,7 +95,6 @@ if((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
   exit(0);
 }
 
-printf("%d\n", bytes);
 printf("%s\n", buf);
 
 if(strstr(buf, PROTOCOL) == NULL)
@@ -107,6 +105,13 @@ if(strstr(buf, PROTOCOL) == NULL)
 }
 
 printf("Accepted protocol\n");
+
+if(send(sockfd, "OK\n", strlen("OK\n"),0) == -1)
+{
+  printf("Error: Couldnt send\n");
+  close(sockfd);
+  exit(0);
+}
 
 
 #ifdef DEBUG 
