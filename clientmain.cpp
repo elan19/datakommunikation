@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
     if((connect(sockfd, p->ai_addr, p->ai_addrlen) == -1))
     {
       close(sockfd);
-      printf("hejsan\n");
+      printf("Error: Couldnt connect.\n");
       exit(0);
     }
     break;
@@ -87,6 +87,7 @@ int main(int argc, char *argv[]){
 
   char buf[128];
   int bytes;
+
 
 if((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
 {
@@ -112,6 +113,41 @@ if(send(sockfd, "OK\n", strlen("OK\n"),0) == -1)
   close(sockfd);
   exit(0);
 }
+
+memset(buf,0,128);
+
+if((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
+{
+  printf("%s\n",strerror(errno));
+  close(sockfd);
+  exit(0);
+}
+
+printf("%s\n", buf);
+
+ char operation[5];
+
+if(buf[0] == 'f')
+{
+  double value1 = 0;
+  double value2 = 0;
+
+  sscanf(buf, "%s %lf %lf", operation, &value1, &value2);
+  printf("%lf %lf\n", value1, value2);
+
+}
+else
+{
+  int value1 = 0;
+  int value2 = 0;
+
+  sscanf(buf, "%s %d %d", operation, &value1, &value2);
+
+  printf("%d %d\n", value1, value2);
+
+}
+
+
 
 
 #ifdef DEBUG 
