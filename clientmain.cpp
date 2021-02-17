@@ -11,10 +11,9 @@
 /* You will to add includes here */
 
 // Enable if you want debugging to be printed, see examble below.
-// Alternative, pass 
+// Alternative, pass
 #define DEBUG
 #define PROTOCOL "TEXT TCP 1.0\n"
-
 
 // Included to get the support library
 #include "calcLib.h"
@@ -27,58 +26,60 @@ int main(int argc, char *argv[])
      Atm, works only on dotted notation, i.e. IPv4 and DNS. IPv6 does not work if its using ':'. 
   */
 
-  if(argc != 2)
+  if (argc != 2)
   {
     printf("Wrong format IP:PORT\n");
     exit(0);
   }
 
-  char delim[]=":";
-  char *Desthost=strtok(argv[1],delim);
-  char *Destport=strtok(NULL,delim);
+  char delim[] = ":";
+  char *Desthost = strtok(argv[1], delim);
+  char *Destport = strtok(NULL, delim);
 
-  if(Desthost == NULL || Destport == NULL)
+  if (Desthost == NULL || Destport == NULL)
   {
     printf("Wrong format.\n");
     exit(0);
   }
 
   // *Desthost now points to a sting holding whatever came before the delimiter, ':'.
-  // *Dstport points to whatever string came after the delimiter. 
+  // *Dstport points to whatever string came after the delimiter.
 
   /* Do magic */
 
-  int port=atoi(Destport);
+  int port = atoi(Destport);
 
   addrinfo sa, *si, *p;
+  memset(&sa, 0, sizeof(sa));
   sa.ai_family = AF_INET;
   sa.ai_socktype = SOCK_STREAM;
-  if(int rv = getaddrinfo(Desthost, Destport, &sa, &si) != 0)
+  if (int rv = getaddrinfo(Desthost, Destport, &sa, &si) != 0)
   {
-    fprintf(stderr,"%s\n", gai_strerror(rv));
+    fprintf(stderr, "%s\n", gai_strerror(rv));
     exit(0);
   }
 
   int sockfd;
 
-  for(p = si; p != NULL; p = p->ai_next)
+  for (p = si; p != NULL; p = p->ai_next)
   {
-    if((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
+    if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
     {
+      perror("Error: Couldnt connect.\n");
       continue;
     }
 
-    if((connect(sockfd, p->ai_addr, p->ai_addrlen) == -1))
+
+    if ((connect(sockfd, p->ai_addr, p->ai_addrlen) == -1))
     {
       close(sockfd);
       printf("Error: Couldnt connect.\n");
-      exit(0);
+      continue;
     }
     break;
   }
 
-
-  if(p == NULL)
+  if (p == NULL)
   {
     printf("NULL\n");
     exit(0);
@@ -89,17 +90,16 @@ int main(int argc, char *argv[])
   char buf[128];
   int bytes;
 
-
-  if((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
   {
-   printf("%s\n",strerror(errno));
+    printf("%s\n", strerror(errno));
     close(sockfd);
     exit(0);
   }
 
-  printf("%s\n", buf);
+  printf("%s", buf);
 
-  if(strstr(buf, PROTOCOL) == NULL)
+  if (strstr(buf, PROTOCOL) == NULL)
   {
     printf("Wrong protocol.\n");
     close(sockfd);
@@ -108,18 +108,18 @@ int main(int argc, char *argv[])
 
   printf("Accepted protocol\n");
 
-  if(send(sockfd, "OK\n", strlen("OK\n"),0) == -1)
+  if (send(sockfd, "OK\n", strlen("OK\n"), 0) == -1)
   {
     printf("Error: Couldnt send\n");
     close(sockfd);
     exit(0);
   }
 
-  memset(buf,0,128);
+  memset(buf, 0, 128);
 
-  if((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
   {
-    printf("%s\n",strerror(errno));
+    printf("%s\n", strerror(errno));
     close(sockfd);
     exit(0);
   }
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 
   char operation[5];
 
-  if(buf[0] == 'f')
+  if (buf[0] == 'f')
   {
     double value1 = 0;
     double value2 = 0;
@@ -136,15 +136,15 @@ int main(int argc, char *argv[])
 
     sscanf(buf, "%s %lf %lf", operation, &value1, &value2);
 
-    if(strstr(operation, "fadd"))
+    if (strstr(operation, "fadd"))
     {
       total = value1 + value2;
     }
-    else if(strstr(operation, "fdiv"))
+    else if (strstr(operation, "fdiv"))
     {
       total = value1 / value2;
     }
-    else if(strstr(operation, "fmul"))
+    else if (strstr(operation, "fmul"))
     {
       total = value1 * value2;
     }
@@ -155,16 +155,15 @@ int main(int argc, char *argv[])
 
     printf("%lf\n", total);
 
-    char answ[5];
+    char answ[12];
     sprintf(answ, "%lf\n", total);
 
-    if(send(sockfd, answ, strlen(answ),0) == -1) 
-  {
-    printf("Error: Couldnt send\n");
-    close(sockfd);
-    exit(0);
-  }
-
+    if (send(sockfd, answ, strlen(answ), 0) == -1)
+    {
+      printf("Error: Couldnt send\n");
+      close(sockfd);
+      exit(0);
+    }
   }
   else
   {
@@ -174,15 +173,15 @@ int main(int argc, char *argv[])
 
     sscanf(buf, "%s %d %d", operation, &value1, &value2);
 
-    if(strstr(operation, "add"))
+    if (strstr(operation, "add"))
     {
       total = value1 + value2;
     }
-    else if(strstr(operation, "div"))
+    else if (strstr(operation, "div"))
     {
       total = value1 / value2;
     }
-    else if(strstr(operation, "mul"))
+    else if (strstr(operation, "mul"))
     {
       total = value1 * value2;
     }
@@ -196,31 +195,29 @@ int main(int argc, char *argv[])
     char answ[3];
     sprintf(answ, "%d\n", total);
 
-    if(send(sockfd, answ, strlen(answ),0) == -1)  
+    if (send(sockfd, answ, strlen(answ), 0) == -1)
     {
       printf("Error: Couldnt send\n");
       close(sockfd);
       exit(0);
     }
-
   }
 
-  memset(buf,0,128);
+  memset(buf, 0, 128);
 
-  if((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
   {
-    printf("%s\n",strerror(errno));
+    printf("%s\n", strerror(errno));
     close(sockfd);
     exit(0);
   }
 
   printf("%s\n", buf);
 
+#ifdef DEBUG
+  printf("Host %s, and port %d.\n", Desthost, port);
+#endif
 
-  #ifdef DEBUG 
-    printf("Host %s, and port %d.\n",Desthost,port);
-  #endif
-
-    close(sockfd);
-    return 0;
+  close(sockfd);
+  return 0;
 }
