@@ -14,6 +14,7 @@
 // Alternative, pass
 #define DEBUG
 #define PROTOCOL "TEXT TCP 1.0\n"
+#define ERROR "ERROR TO\n"
 
 // Included to get the support library
 #include "calcLib.h"
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
   char buf[128];
   int bytes;
 
-  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1 || strcmp(buf,ERROR) == 0)
   {
     printf("%s\n", strerror(errno));
     close(sockfd);
@@ -117,7 +118,7 @@ int main(int argc, char *argv[])
 
   memset(buf, 0, 128);
 
-  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1|| strcmp(buf,ERROR) == 0)
   {
     printf("%s\n", strerror(errno));
     close(sockfd);
@@ -205,7 +206,7 @@ int main(int argc, char *argv[])
 
   memset(buf, 0, 128);
 
-  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1|| strcmp(buf,ERROR) == 0)
   {
     printf("%s\n", strerror(errno));
     close(sockfd);
