@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
     else if (arith[0] == 'f')
     {
       sscanf(recvBuffer, "%lf", &dRecvAnswer);
-      if (dAnsw == dRecvAnswer)
+      if (abs(dAnsw - dRecvAnswer) < 0.0001)
       {
         sprintf(buffer, "%s", "OK\n");
       }
