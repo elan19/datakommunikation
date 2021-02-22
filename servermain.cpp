@@ -84,8 +84,13 @@ int main(int argc, char *argv[])
   len = sizeof(cli);
   bool clientIsActive = false;
   char buffer[128];
+  char recvBuffer[128];
+  double d1, d2, dAnsw, dRecvAnswer;
+  int int1, int2, intAnsw, intRecvAnswer;
+  char *arith;
 
   printf("Listening\n");
+  initCalcLib();
 
   while (true)
   {
@@ -99,7 +104,8 @@ int main(int argc, char *argv[])
       else
       {
         clientIsActive = true;
-        char buf[strlen(PROTOCOL)] = PROTOCOL;
+        char buf[128] = PROTOCOL;
+        arith = randomType();
         if (send(connfd, buf, strlen(buf), 0) == -1)
         {
           printf("Error: Send failed!\n");
@@ -109,13 +115,92 @@ int main(int argc, char *argv[])
     }
 
     memset(buffer, 0, sizeof(buffer));
-    if(recv(connfd, buffer, sizeof(buffer), 0) == -1)
+    memset(recvBuffer, 0, sizeof(recvBuffer));
+    if (recv(connfd, recvBuffer, sizeof(recvBuffer), 0) == -1)
     {
       printf("Error: Recieve timeout, sending error to client!\n");
       send(connfd, "ERROR TO\n", strlen("ERROR TO\n"), 0);
       close(connfd);
     }
 
+    if (strcmp(recvBuffer, "OK\n") == 0)
+    {
+
+      if (arith[0] == 'f')
+      {
+        d1 = randomFloat();
+        d2 = randomFloat();
+        if (strcmp(arith, "fadd") == 0)
+        {
+          dAnsw = d1 + d2;
+        }
+        else if (strcmp(arith, "fsub") == 0)
+        {
+          dAnsw = d1 - d2;
+        }
+        else if (strcmp(arith, "fmul") == 0)
+        {
+          dAnsw = d1 * d2;
+        }
+        else if (strcmp(arith, "fdiv") == 0)
+        {
+          dAnsw = d1 / d2;
+        }
+        printf("%lf\n", dAnsw);
+        sprintf(buffer, "%s %lf %lf\n", arith, d1, d2);
+      }
+      else
+      {
+        int1 = randomInt();
+        int2 = randomInt();
+        if (strcmp(arith, "add") == 0)
+        {
+          intAnsw = int1 + int2;
+        }
+        else if (strcmp(arith, "sub") == 0)
+        {
+          intAnsw = int1 - int2;
+        }
+        else if (strcmp(arith, "mul") == 0)
+        {
+          intAnsw = int1 * int2;
+        }
+        else if (strcmp(arith, "div") == 0)
+        {
+          intAnsw = int1 / int2;
+        }
+        printf("%d\n", intAnsw);
+        sprintf(buffer, "%s %d %d\n", arith, int1, int2);
+      }
+    }
+    else if (arith[0] == 'f')
+    {
+      sscanf(recvBuffer, "%lf", &dRecvAnswer);
+      if (dAnsw == dRecvAnswer)
+      {
+        sprintf(buffer, "%s", "OK\n");
+      }
+      else
+      {
+        sprintf(buffer, "%s", "ERROR\n");
+      }
+    }
+    else if (arith[0] != 'f')
+    {
+      sscanf(recvBuffer, "%d", &intRecvAnswer);
+      if (intAnsw == intRecvAnswer)
+      {
+        sprintf(buffer, "%s", "OK\n");
+      }
+      else
+      {
+        sprintf(buffer, "%s", "ERROR\n");
+      }
+    }
+    else
+    {
+      clientIsActive = false;
+    }
     if (send(connfd, buffer, strlen(buffer), 0) == -1)
     {
       printf("Error: Send failed!\n");
