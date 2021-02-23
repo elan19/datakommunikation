@@ -23,6 +23,12 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
+  if (argc != 2)
+  {
+    printf("Wrong format IP:PORT\n");
+    exit(0);
+  }
+
   /*
     Read first input, assumes <ip>:<port> syntax, convert into one string (Desthost) and one integer (port). 
      Atm, works only on dotted notation, i.e. IPv4 and DNS. IPv6 does not work if its using ':'. 
@@ -34,6 +40,12 @@ int main(int argc, char *argv[])
   // *Dstport points to whatever string came after the delimiter.
 
   /* Do magic */
+
+  if (Desthost == NULL || Destport == NULL)
+  {
+    printf("Wrong format.\n");
+    exit(0);
+  }
   int port = atoi(Destport);
 
   int sockfd, connfd, len;
@@ -43,6 +55,10 @@ int main(int argc, char *argv[])
   memset(&sa, 0, sizeof(sa));
   sa.ai_family = AF_UNSPEC;
   sa.ai_socktype = SOCK_STREAM;
+
+  struct timeval tv;
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
 
   if (int rv = getaddrinfo(Desthost, Destport, &sa, &si) != 0)
   {
@@ -57,6 +73,8 @@ int main(int argc, char *argv[])
       perror("Error: Couldnt connect.\n");
       continue;
     }
+
+  setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
 
     if ((bind(sockfd, p->ai_addr, p->ai_addrlen)) != 0)
     {
@@ -99,7 +117,7 @@ int main(int argc, char *argv[])
       if ((connfd = accept(sockfd, (struct sockaddr *)&cli, (socklen_t *)&len)) == -1)
       {
         printf("Error: Accept failed!\n");
-        exit(0);
+        continue;
       }
       else
       {
@@ -179,10 +197,12 @@ int main(int argc, char *argv[])
       if (abs(dAnsw - dRecvAnswer) < 0.0001)
       {
         sprintf(buffer, "%s", "OK\n");
+        clientIsActive = false;
       }
       else
       {
         sprintf(buffer, "%s", "ERROR\n");
+        clientIsActive = false;
       }
     }
     else if (arith[0] != 'f')
@@ -191,10 +211,12 @@ int main(int argc, char *argv[])
       if (intAnsw == intRecvAnswer)
       {
         sprintf(buffer, "%s", "OK\n");
+        clientIsActive = false;
       }
       else
       {
         sprintf(buffer, "%s", "ERROR\n");
+        clientIsActive = false;
       }
     }
     else

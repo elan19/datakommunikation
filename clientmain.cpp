@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
   char buf[128];
   int bytes;
 
-  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1 || strcmp(buf,ERROR) == 0)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1 || strstr(buf,ERROR) != nullptr)
   {
     printf("%s\n", strerror(errno));
     close(sockfd);
@@ -117,10 +117,9 @@ int main(int argc, char *argv[])
   }
 
   memset(buf, 0, 128);
-
-  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1|| strcmp(buf,ERROR) == 0)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1|| strstr(buf,ERROR) != nullptr)
   {
-    printf("%s\n", strerror(errno));
+    printf("Error: Couldnt recieve!\n");
     close(sockfd);
     exit(0);
   }
@@ -206,7 +205,7 @@ int main(int argc, char *argv[])
 
   memset(buf, 0, 128);
 
-  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1|| strcmp(buf,ERROR) == 0)
+  if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1|| strstr(buf,ERROR) != nullptr)
   {
     printf("%s\n", strerror(errno));
     close(sockfd);
