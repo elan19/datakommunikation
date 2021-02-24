@@ -74,8 +74,6 @@ int main(int argc, char *argv[])
       continue;
     }
 
-  setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
-
     if ((bind(sockfd, p->ai_addr, p->ai_addrlen)) != 0)
     {
       printf("Error: Couldnt bind!\n");
@@ -85,6 +83,7 @@ int main(int argc, char *argv[])
     break;
   }
 
+  setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
   if (p == NULL)
   {
     printf("NULL\n");
@@ -116,7 +115,7 @@ int main(int argc, char *argv[])
     {
       if ((connfd = accept(sockfd, (struct sockaddr *)&cli, (socklen_t *)&len)) == -1)
       {
-        printf("Error: Accept failed!\n");
+        printf("Couldnt accept anything, trying again!\n");
         continue;
       }
       else
@@ -136,9 +135,17 @@ int main(int argc, char *argv[])
     memset(recvBuffer, 0, sizeof(recvBuffer));
     if (recv(connfd, recvBuffer, sizeof(recvBuffer), 0) == -1)
     {
+      if(errno == EAGAIN)
+      {
       printf("Error: Recieve timeout, sending error to client!\n");
       send(connfd, "ERROR TO\n", strlen("ERROR TO\n"), 0);
+      }
+      else{
+        printf("Something went terrible wrong with the recieve!\n");
+      }
       close(connfd);
+      clientIsActive = false;
+      continue;
     }
 
     if (strcmp(recvBuffer, "OK\n") == 0)
@@ -164,7 +171,6 @@ int main(int argc, char *argv[])
         {
           dAnsw = d1 / d2;
         }
-        printf("%lf\n", dAnsw);
         sprintf(buffer, "%s %lf %lf\n", arith, d1, d2);
       }
       else
@@ -187,7 +193,6 @@ int main(int argc, char *argv[])
         {
           intAnsw = int1 / int2;
         }
-        printf("%d\n", intAnsw);
         sprintf(buffer, "%s %d %d\n", arith, int1, int2);
       }
     }
@@ -197,11 +202,13 @@ int main(int argc, char *argv[])
       if (abs(dAnsw - dRecvAnswer) < 0.0001)
       {
         sprintf(buffer, "%s", "OK\n");
+        printf("Client handled, the results match!\n");
         clientIsActive = false;
       }
       else
       {
         sprintf(buffer, "%s", "ERROR\n");
+        printf("Client handled, the results did not match!\n");
         clientIsActive = false;
       }
     }
@@ -211,11 +218,13 @@ int main(int argc, char *argv[])
       if (intAnsw == intRecvAnswer)
       {
         sprintf(buffer, "%s", "OK\n");
+        printf("Client handled, the results match!\n");
         clientIsActive = false;
       }
       else
       {
         sprintf(buffer, "%s", "ERROR\n");
+        printf("Client handled, the results did not match!\n");
         clientIsActive = false;
       }
     }

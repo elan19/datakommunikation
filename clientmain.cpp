@@ -94,7 +94,6 @@ int main(int argc, char *argv[])
   if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1 || strstr(buf,ERROR) != nullptr)
   {
     printf("%s\n", strerror(errno));
-    close(sockfd);
     exit(0);
   }
 
@@ -103,7 +102,6 @@ int main(int argc, char *argv[])
   if (strstr(buf, PROTOCOL) == NULL)
   {
     printf("Wrong protocol.\n");
-    close(sockfd);
     exit(0);
   }
 
@@ -112,7 +110,6 @@ int main(int argc, char *argv[])
   if (send(sockfd, "OK\n", strlen("OK\n"), 0) == -1)
   {
     printf("Error: Couldnt send\n");
-    close(sockfd);
     exit(0);
   }
 
@@ -120,7 +117,6 @@ int main(int argc, char *argv[])
   if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1|| strstr(buf,ERROR) != nullptr)
   {
     printf("Error: Couldnt recieve!\n");
-    close(sockfd);
     exit(0);
   }
 
@@ -161,7 +157,6 @@ int main(int argc, char *argv[])
     if (send(sockfd, answ, strlen(answ), 0) == -1)
     {
       printf("Error: Couldnt send\n");
-      close(sockfd);
       exit(0);
     }
   }
@@ -198,7 +193,6 @@ int main(int argc, char *argv[])
     if (send(sockfd, answ, strlen(answ), 0) == -1)
     {
       printf("Error: Couldnt send\n");
-      close(sockfd);
       exit(0);
     }
   }
@@ -208,7 +202,6 @@ int main(int argc, char *argv[])
   if ((bytes = recv(sockfd, buf, sizeof(buf), 0)) == -1|| strstr(buf,ERROR) != nullptr)
   {
     printf("%s\n", strerror(errno));
-    close(sockfd);
     exit(0);
   }
 
